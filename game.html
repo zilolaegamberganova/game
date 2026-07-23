@@ -1,0 +1,679 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Defenders: Cyberpunk Runner Pro</title>
+    <style>
+        :root {
+            --bg-dark: #050c09;
+            --bg-panel: #0b1a14;
+            --card-bg: #122920;
+            --accent: #00ffaa;
+            --accent-glow: rgba(0, 255, 170, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #73968a;
+            --warning: #ffb703;
+            --danger: #ff4d6d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* RO'YXATDAN O'TISH OYNASI */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0d261c, #050c09);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; gap: 20px;
+        }
+        .auth-box {
+            background: var(--bg-panel); border: 2px solid var(--accent);
+            padding: 40px; border-radius: 20px; box-shadow: 0 0 30px var(--accent-glow);
+            text-align: center; width: 340px;
+        }
+        .auth-box input {
+            width: 100%; padding: 12px; background: #030806; border: 1px solid var(--text-muted);
+            border-radius: 8px; color: #fff; text-align: center; font-size: 16px; margin: 20px 0; outline: none;
+        }
+        .auth-box input:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+
+        /* SIDEBAR INTERFEYS */
+        .sidebar {
+            width: 260px;
+            background: #030806;
+            border-right: 2px solid rgba(0, 255, 170, 0.1);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            text-align: center;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent-glow);
+            margin-bottom: 30px;
+            border-bottom: 2px dashed var(--accent);
+            padding-bottom: 15px;
+        }
+
+        .menu-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-btn:hover, .menu-btn.active {
+            color: var(--accent);
+            background: rgba(0, 255, 170, 0.08);
+            border-color: rgba(0, 255, 170, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* ASOSIY PANEL */
+        .main-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, #0d261c, var(--bg-dark));
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .top-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-panel);
+            padding: 20px 30px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 255, 170, 0.15);
+        }
+
+        .eco-balance {
+            background: rgba(0, 255, 170, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 700;
+        }
+
+        /* SCREENS */
+        .screen { display: none; }
+        .screen.active { display: flex; flex-direction: column; }
+        
+        /* KIBER QUVLOV SECTION */
+        #battle.active {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pro-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .pro-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .avatar-glow {
+            width: 70px;
+            height: 70px;
+            background: rgba(0,255,170,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin: 0 auto 15px auto;
+            border: 1px solid var(--accent);
+        }
+
+        .btn-pro {
+            background: linear-gradient(135deg, #00ffaa 0%, #00b372 100%);
+            color: #030806;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .btn-pro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 170, 0.4);
+        }
+
+        /* CANVAS KONTEYNERI */
+        .game-container {
+            background: #020504;
+            border: 2px solid rgba(0, 255, 170, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+
+        canvas {
+            width: 100%;
+            flex: 1;
+            display: block;
+            background: #040d0a;
+        }
+
+        .live-stats {
+            display: flex;
+            justify-content: space-around;
+            background: var(--bg-panel);
+            padding: 15px;
+            border-bottom: 2px solid rgba(0, 255, 170, 0.15);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* AWARDS PANEL VE BOX */
+        .award-box {
+            display: flex; background: var(--bg-panel); border: 1px solid rgba(0,255,170,0.2);
+            padding: 20px; border-radius: 16px; align-items: center; gap: 20px; margin-top: 15px;
+        }
+        .award-icon { font-size: 45px; filter: drop-shadow(0 0 10px #ffcc00); }
+
+        /* REYTING JADVALI STILI */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--bg-panel);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 170, 0.1);
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .leaderboard-table th {
+            background: rgba(0, 255, 170, 0.1);
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .leaderboard-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .rank-highlight {
+            color: var(--warning);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2 style="color: var(--accent);">REGISTRATION</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">Kiber-ekolog taxallusingizni kiriting</p>
+            <input type="text" id="username-input" placeholder="User Name..." autocomplete="off">
+            <button class="btn-pro" onclick="registerUser()">O'YINGA KIRISH</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="logo">ECO SYSTEM</div>
+        <button class="menu-btn active" onclick="switchTab('heroes', event)">🥷 Choose Hero</button>
+        <button class="menu-btn" onclick="switchTab('battle', event)">🏃 Kiber Quvlov</button>
+        <button class="menu-btn" onclick="switchTab('awards', event)">🏆 Awards</button>
+        <button class="menu-btn" onclick="switchTab('leaderboard', event)">📊 Leaderboard</button>
+    </div>
+
+    <div class="main-panel">
+        <div class="top-hud">
+            <h2 id="hud-title">Qahramonni Tanlash</h2>
+            <div class="eco-balance">AGENT: <span id="hud-username" style="color:#fff;">-</span> | ECO BALANS: <span id="coins-txt">100</span> 🌱</div>
+        </div>
+
+        <div id="heroes" class="screen active">
+            <h3>Operatsiya uchun faol kiber-ekologni faollashtiring:</h3>
+            <div class="grid" id="heroes-grid"></div>
+        </div>
+
+        <div id="battle" class="screen">
+            <div class="game-container">
+                <div class="live-stats">
+                    <div>Masofa: <span id="live-meters" style="color:var(--accent);">0 m</span></div>
+                    <div>Yig'ilgan Tangalar: <span id="live-coins" style="color:var(--warning);">0</span></div>
+                    <div>Agent: <span id="live-hero-name" style="color:#00ffaa;">-</span></div>
+                </div>
+                <canvas id="runCanvas"></canvas>
+                <div style="padding: 15px; text-align: center; background: var(--bg-panel); border-top: 1px solid rgba(0,255,170,0.1);">
+                    <button class="btn-pro" id="start-btn" onclick="startRunnerGame()" style="width: auto; padding: 12px 60px;">JANGNI BOSHLASH</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="awards" class="screen">
+            <h3>Sizning yutuqlaringiz va kiber kuboklar</h3>
+            <div class="award-box">
+                <div class="award-icon">🏆</div>
+                <div>
+                    <h4>O'g'ri Ovchisi Oliy Kubogi</h4>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Kiber-quvlovda o'g'rini muvaffaqiyatli qo'lga kiritgan qahramonlar uchun beriladi.</p>
+                    <p style="margin-top: 5px;">Tutilgan o'g'rilar soni: <span id="award-thief-count" style="color: var(--accent); font-weight: bold;">0</span> ta</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="leaderboard" class="screen">
+            <h3>Kiber-Ekologlar Reyting Jadvali</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">O'rin</th>
+                        <th>Kiber Agent</th>
+                        <th style="text-align: right;">Eco Balans 🌱</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            username: "",
+            coins: 100,
+            activeHero: "O'rmon Reyndjeri",
+            thievesCaughtTotal: 0,
+            heroes: {
+                "O'rmon Reyndjeri": { color: "#00ffaa", speed: 5, icon: "🟢" },
+                "Kiber Akva": { color: "#00b3ff", speed: 6.5, icon: "🔵" },
+                "Neon Alfa": { color: "#e056fd", speed: 7.2, icon: "🟣" },
+                "Kiber Vulkan": { color: "#ff7675", speed: 6.0, icon: "🔴" }
+            }
+        };
+
+        const canvas = document.getElementById("runCanvas");
+        const ctx = canvas.getContext("2d");
+        let gameInterval = null;
+        let isPlaying = false;
+
+        let gameData = {
+            playerY: 200,
+            thiefX: 1100,
+            thiefY: 200,
+            meters: 0,
+            coinsCollected: 0,
+            obstacles: [],
+            coinItems: [],
+            animFrame: 0,
+            gameOver: false,
+            thiefCaught: false,
+            rewardTimer: 0
+        };
+
+        let activeKeys = {};
+        window.addEventListener("keydown", e => activeKeys[e.key.toLowerCase()] = true);
+        window.addEventListener("keyup", e => activeKeys[e.key.toLowerCase()] = false);
+
+        // REYTING FUNKSIYALARI
+        function updateLeaderboardData(username, score) {
+            let leaderboard = JSON.parse(localStorage.getItem("eco_leaderboard")) || [];
+            let userExist = leaderboard.find(user => user.name.toLowerCase() === username.toLowerCase());
+            
+            if (userExist) {
+                if (score > userExist.score) userExist.score = score; // Faqat eng yuqori ballni saqlaydi
+            } else {
+                leaderboard.push({ name: username, score: score });
+            }
+            
+            // Saralash: Kattadan kichikka
+            leaderboard.sort((a, b) => b.score - a.score);
+            localStorage.setItem("eco_leaderboard", JSON.stringify(leaderboard));
+            drawLeaderboard();
+        }
+
+        function drawLeaderboard() {
+            let leaderboard = JSON.parse(localStorage.getItem("eco_leaderboard")) || [];
+            let tbody = document.getElementById("leaderboard-body");
+            tbody.innerHTML = "";
+            
+            leaderboard.forEach((user, index) => {
+                let rank = index + 1;
+                let medal = rank === 1 ? "🥇 " : rank === 2 ? "🥈 " : rank === 3 ? "🥉 " : "";
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="rank-highlight">${medal}${rank}</td>
+                        <td style="color: ${user.name === state.username ? 'var(--accent)' : '#fff'}">${user.name}</td>
+                        <td style="text-align: right; font-weight: bold; color: var(--warning);">${user.score}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function registerUser() {
+            let name = document.getElementById("username-input").value.trim();
+            if(name === "") name = "Cyber_Agent";
+            state.username = name;
+            document.getElementById("hud-username").innerText = name;
+            document.getElementById("auth-screen").style.display = "none";
+            
+            // Yangi foydalanuvchini 100 boshlang'ich ball bilan reytingga kiritish
+            updateLeaderboardData(state.username, state.coins);
+            drawHeroes();
+        }
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height - 55; 
+        }
+        window.addEventListener('resize', () => { if(isPlaying) resizeCanvas(); });
+
+        function switchTab(id, e) {
+            if(isPlaying) stopGame();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(e) e.target.classList.add('active');
+
+            const titles = { heroes: "Choose Hero", battle: "Kiber Quvlov", awards: "Awards", leaderboard: "Leaderboard" };
+            document.getElementById('hud-title').innerText = titles[id];
+
+            if(id === 'heroes') drawHeroes();
+            if(id === 'leaderboard') drawLeaderboard();
+            if(id === 'battle') {
+                document.getElementById('live-hero-name').innerText = state.activeHero;
+                setTimeout(resizeCanvas, 50); 
+            }
+        }
+
+        function drawHeroes() {
+            let box = document.getElementById('heroes-grid'); box.innerHTML = '';
+            for(let name in state.heroes) {
+                let h = state.heroes[name];
+                let sel = state.activeHero === name;
+                box.innerHTML += `
+                    <div class="pro-card ${sel ? 'selected' : ''}">
+                        <div class="avatar-glow" style="color:${h.color}; font-weight:bold;">${h.icon}</div>
+                        <h4>${name}</h4>
+                        <button class="btn-pro" style="font-size:12px; padding:8px; margin-top:15px;" onclick="selectHero('${name}')">
+                            ${sel ? 'SELECTED' : 'CHOOSE'}
+                        </button>
+                    </div>`;
+            }
+        }
+        function selectHero(name) { state.activeHero = name; drawHeroes(); }
+
+        // DINAMIK HARAKATLANUVCHI QO'LLAR VA OYOQLAR BILAN REALISTIK RUNNER
+        function drawRealisticRunner(ctx, x, y, color, frame, label, isDead) {
+            let speedFactor = 0.25; 
+            let cycle = isDead ? 0 : frame * speedFactor;
+            let bodyLean = 0.15;
+            let torsoLen = 22;
+            let hipY = y - 5;
+            let neckX = x + Math.sin(bodyLean) * torsoLen;
+            let neckY = hipY - Math.cos(bodyLean) * torsoLen;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4.5;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            // 1. Tana (Torso)
+            ctx.beginPath();
+            ctx.moveTo(x, hipY);
+            ctx.lineTo(neckX, neckY);
+            ctx.stroke();
+
+            // 2. Dubulg'a (Bosh)
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(neckX + 3, neckY - 8, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Qimirlash fazalari (chap va o'ng teskari harakat qiladi)
+            let leftPhase = Math.sin(cycle);
+            let rightPhase = Math.sin(cycle + Math.PI);
+
+            if(!isDead) {
+                // 3. OYOQLAR
+                // Chap oyoq
+                ctx.beginPath(); ctx.moveTo(x, hipY);
+                ctx.lineTo(x + leftPhase * 14, hipY + 16); ctx.stroke();
+
+                // O'ng oyoq
+                ctx.beginPath(); ctx.moveTo(x, hipY);
+                ctx.lineTo(x + rightPhase * 14, hipY + 16); ctx.stroke();
+
+                // 4. QO'LLAR (YUGURGANDA QIMIRLAYDIGAN QO'LLAR)
+                let shoulderX = neckX - 2;
+                let shoulderY = neckY + 4;
+
+                // Chap qo'l
+                ctx.beginPath(); ctx.moveTo(shoulderX, shoulderY);
+                ctx.lineTo(shoulderX + rightPhase * 12 + 4, shoulderY + 10); ctx.stroke();
+
+                // O'ng qo'l
+                ctx.beginPath(); ctx.moveTo(shoulderX, shoulderY);
+                ctx.lineTo(shoulderX + leftPhase * 12 + 4, shoulderY + 10); ctx.stroke();
+
+            } else {
+                // Mag'lubiyat holati
+                ctx.strokeStyle = "#ff4d6d";
+                ctx.beginPath(); ctx.moveTo(x, hipY); ctx.lineTo(x - 12, hipY + 8); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(neckX - 2, neckY + 4); ctx.lineTo(neckX - 10, neckY + 12); ctx.stroke();
+            }
+
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+            ctx.font = "bold 11px monospace";
+            ctx.fillText(label, x - 25, y - 45);
+        }
+
+        function startRunnerGame() {
+            if(isPlaying) return;
+            isPlaying = true;
+            document.getElementById('start-btn').style.display = 'none';
+            resizeCanvas();
+
+            gameData.playerY = canvas.height / 2;
+            gameData.thiefX = canvas.width - 150;
+            gameData.thiefY = canvas.height / 2;
+            gameData.meters = 0;
+            gameData.coinsCollected = 0;
+            gameData.obstacles = [];
+            gameData.coinItems = [];
+            gameData.animFrame = 0;
+            gameData.gameOver = false;
+            gameData.thiefCaught = false;
+            gameData.rewardTimer = 0;
+
+            gameInterval = setInterval(updateEngine, 1000 / 60);
+        }
+
+        function stopGame() {
+            clearInterval(gameInterval);
+            isPlaying = false;
+            document.getElementById('start-btn').style.display = 'inline-block';
+            // O'yin tugashi bilan ballni reyting bazasiga yangilash
+            updateLeaderboardData(state.username, state.coins);
+        }
+
+        function updateEngine() {
+            gameData.animFrame++;
+
+            if (gameData.gameOver) return;
+
+            // Agent boshqaruvi
+            if (!gameData.thiefCaught) {
+                let pSpeed = state.heroes[state.activeHero].speed;
+                if(activeKeys["w"] || activeKeys["arrowup"]) gameData.playerY -= pSpeed;
+                if(activeKeys["s"] || activeKeys["arrowdown"]) gameData.playerY += pSpeed;
+                gameData.playerY = Math.max(60, Math.min(canvas.height - 60, gameData.playerY));
+                gameData.meters += 0.3;
+            }
+
+            document.getElementById('live-meters').innerText = Math.floor(gameData.meters) + " m";
+            document.getElementById('live-coins').innerText = gameData.coinsCollected;
+
+            // O'g'ri harakati
+            if (!gameData.thiefCaught) {
+                gameData.thiefY += Math.sin(gameData.animFrame * 0.06) * 3.5;
+                gameData.thiefY = Math.max(60, Math.min(canvas.height - 60, gameData.thiefY));
+                if(gameData.meters > 40 && gameData.thiefX > 190) {
+                    gameData.thiefX -= 0.4; 
+                }
+            }
+
+            // To'siqlar generatsiyasi
+            if(!gameData.thiefCaught && Math.random() < 0.02) {
+                gameData.obstacles.push({
+                    x: canvas.width + 50,
+                    y: Math.random() * (canvas.height - 120) + 60,
+                    icon: "🚧"
+                });
+            }
+            
+            if(!gameData.thiefCaught && Math.random() < 0.035) {
+                gameData.coinItems.push({ x: canvas.width + 50, y: Math.random() * (canvas.height - 120) + 60 });
+            }
+
+            // To'siqqa urilish
+            gameData.obstacles.forEach((obs) => {
+                obs.x -= 6.5;
+                if(obs.x > 85 && obs.x < 115 && Math.abs(obs.y - gameData.playerY) < 28) {
+                    gameData.gameOver = true;
+                    setTimeout(() => { stopGame(); }, 1200);
+                }
+            });
+
+            // Tangalar yig'ish
+            gameData.coinItems.forEach((coin, index) => {
+                coin.x -= 6.5;
+                if(coin.x > 85 && coin.x < 115 && Math.abs(coin.y - gameData.playerY) < 28) {
+                    gameData.coinItems.splice(index, 1);
+                    gameData.coinsCollected++;
+                    state.coins += 10;
+                    document.getElementById('coins-txt').innerText = state.coins;
+                }
+            });
+
+            // O'g'rini tutish
+            if(!gameData.thiefCaught && gameData.thiefX <= 140 && Math.abs(gameData.thiefY - gameData.playerY) < 35) {
+                gameData.thiefCaught = true;
+                gameData.rewardTimer = 150;
+                state.thievesCaughtTotal++;
+                state.coins += 300;
+                document.getElementById('coins-txt').innerText = state.coins;
+                document.getElementById('award-thief-count').innerText = state.thievesCaughtTotal;
+            }
+
+            if (gameData.thiefCaught) {
+                gameData.rewardTimer--;
+                if (gameData.rewardTimer <= 0) {
+                    stopGame();
+                }
+            }
+
+            renderGraphics();
+        }
+
+        function renderGraphics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Neon chiziqlar
+            ctx.strokeStyle = "rgba(0, 255, 170, 0.04)";
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+
+            // Tangalar
+            gameData.coinItems.forEach(c => {
+                ctx.fillStyle = "#ffcc00"; ctx.beginPath(); ctx.arc(c.x, c.y, 9, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // To'siqlar
+            gameData.obstacles.forEach(o => {
+                ctx.fillStyle = "#ff9f43"; ctx.font = "26px Arial"; ctx.fillText(o.icon, o.x - 12, o.y + 8);
+            });
+
+            // Agentni chizish
+            let heroColor = state.heroes[state.activeHero].color;
+            drawRealisticRunner(ctx, 100, gameData.playerY, heroColor, gameData.animFrame, "AGENT", gameData.gameOver);
+
+            // O'g'rini chizish
+            drawRealisticRunner(ctx, gameData.thiefX, gameData.thiefY, "#ff4d6d", gameData.animFrame * 1.25, gameData.thiefCaught ? "TUTILDI" : "O'G'RI", gameData.thiefCaught);
+
+            // Ekranda mag'lubiyat yozuvi
+            if (gameData.gameOver) {
+                ctx.fillStyle = "#ff4d6d"; ctx.font = "bold 35px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText("YUTQAZDINGIZ!", canvas.width / 2, canvas.height / 2);
+            }
+
+            // Mukofot yozuvi
+            if (gameData.thiefCaught && gameData.rewardTimer > 0) {
+                ctx.save();
+                ctx.shadowBlur = 20; ctx.shadowColor = "#ffcc00";
+                ctx.font = "65px Arial"; ctx.textAlign = "center";
+                ctx.fillText("🏆", canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillStyle = "#ffcc00"; ctx.font = "bold 22px sans-serif";
+                ctx.fillText("MUVAFFAQIYATLI TUTILDI!", canvas.width / 2, canvas.height / 2 + 30);
+                ctx.fillStyle = "#00ffaa"; ctx.font = "16px sans-serif";
+                ctx.fillText("+300 ECO BONUS MUKOFOT", canvas.width / 2, canvas.height / 2 + 60);
+                ctx.restore();
+            }
+        }
+    </script>
+</body>
+</html>
