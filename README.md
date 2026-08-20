@@ -20,7 +20,8 @@ A cyberpunk-style eco runner game where players become cyber agents, chase thiev
 
 ## 🎯 Play Online
 
-👉 [**Click here to play now!**](https://zilolaegamberganova.gi<img width="1280" height="604" alt="{84BADCCD-FC82-49EE-91D5-B063668228DA}" src="https://github.com/user-attachments/assets/b18270e1-49cc-46f4-841f-7ef9e8349912" />
+👉 [**Click here to play now!**](https://zilolaegamberganova.gi
+<img width="1280" height="604" alt="{84BADCCD-FC82-49EE-91D5-B063668228DA}" src="https://github.com/user-attachments/assets/b18270e1-49cc-46f4-841f-7ef9e8349912" />
 <img width="1249" height="598" alt="{44B6F423-9192-44F8-A67B-81B04FBF9DE0}" src="https://github.com/user-attachments/assets/111bf52c-7e3c-49ce-803b-038c82e82bb4" />
 thub.io/game/)
 
